@@ -1,34 +1,12 @@
-import logging
 from dotenv import load_dotenv
 import os
-from twilio.rest import Client
-import openai
 import requests
+from twilio.rest import Client
+
 
 load_dotenv()
 
-api_key=os.getenv("API_KEY")
-account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-client = Client(account_sid, auth_token)
-twilio_number = os.getenv('TWILIO_NUMBER')
-api_key=os.getenv("API_KEY")
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Sending message logic through Twilio Messaging API
-def send_message(to_number, text):
-    try:
-        message = client.messages.create(
-            from_=twilio_number,
-            to=to_number,
-            body=text
-            )
-        logger.info(f"Message sent to {to_number}: {message.body}")
-    except Exception as e:
-        logger.error(f"Error sending message to {to_number}: {e}")
+api_key=os.getenv("HUGGING_API_KEY")
 
 # SMS Classification
 def sms_spam_class(sms):
@@ -59,7 +37,7 @@ def sms_spam_class(sms):
         if label_1_score > label_0_score:
             spam_class = "spam"
         else:
-            spam_class = "not spam"
+            spam_class = "ham"
     else:
         spam_class = "Unable to determine spam status."
     

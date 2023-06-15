@@ -1,31 +1,32 @@
-from fastapi import FastAPI, Form, File, UploadFile
-import requests
-from utils import send_message, sms_spam_class
+from fastapi import FastAPI, Form, Request
+from utils import sms_spam_class
 from dotenv import load_dotenv
 import os
-import json
-import openai
-from twilio.twiml.messaging_response import MessagingResponse
-from pydantic import BaseModel
 from faunadb import query as q
-from faunadb.objects import Ref
-from faunadb.client import FaunaClient
 from model import client
-
 
 load_dotenv()
 
 app = FastAPI(debug=True)
-to_number = os.getenv("TO_NUMBER")
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
 
 @app.post("/sms")
-def reply(sms: str = Form(...)):
-    message = sms_spam_class(sms)
+async def reply(request: Request):
+    form_data = await request.form()
+    MessageSid = form_data["MessageSid"]
+    AccountSid = form_data["AccountSid"]
+    From = form_data["From"]
+    Body = form_data["Body"]
+    To = form_data["To"]
+
+    spam_class = sms_spam_class(Body)
     response = client.query(q.create(q.collection("sms"), {"data": {
-        "sender_number": to_number,
-        "sms": sms,
-        "spam_classification": message
+        "MessageSid": MessageSid,
+        "AccountSid": AccountSid,
+        "From": From,
+        "Body": Body,
+        "To": To,
+        "spam_classification": spam_class
     }}))
+
+
     return ""
